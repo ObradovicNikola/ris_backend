@@ -45,18 +45,17 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 				.csrf().disable().authorizeRequests()
 				.antMatchers("/login", "/register", "/").permitAll()
 				.antMatchers("/admin").hasAnyAuthority("ADMIN")
+				.antMatchers("/courses/signup").hasAnyAuthority("STUDENT")
 				.antMatchers("/uploadFile", "/deleteFile/**").hasAnyAuthority("PROFESOR", "ADMIN")
 				.antMatchers("/courses/*").hasAnyAuthority("STUDENT", "PROFESOR", "ADMIN")
 				.antMatchers("/courses").hasAnyAuthority("STUDENT", "ADMIN")
 				.antMatchers("/mycourses").hasAnyAuthority("STUDENT", "PROFESOR")
-//				.antMatchers("/user", "/downloadFile/**").hasAnyAuthority("STUDENT", "PROFESOR", "ADMIN")
 				.anyRequest().authenticated().and()
 				.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
 
 		http.addFilterBefore(authorizeFilter, UsernamePasswordAuthenticationFilter.class);
 	}
 //			.antMatchers("/user").hasAnyRole("STUDENT", "PROFESOR", "ADMIN")
-//			.antMatchers("/**").permitAll()
 
 	@Override
 	@Bean
@@ -67,7 +66,6 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 	@Bean
 	public PasswordEncoder getPasswordEncoder() {
 		return new BCryptPasswordEncoder();
-//		return new NoOpPa
 	}
 
 }

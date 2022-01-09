@@ -24,6 +24,8 @@ public class Course implements Serializable {
 
 	private String sadrzaj;
 
+	private String sifra;
+
 	//bi-directional many-to-one association to Aktivnost
 	@OneToMany(mappedBy="course")
 	private List<Aktivnost> aktivnosts;
@@ -78,6 +80,14 @@ public class Course implements Serializable {
 
 	public void setSadrzaj(String sadrzaj) {
 		this.sadrzaj = sadrzaj;
+	}
+
+	public String getSifra() {
+		return this.sifra;
+	}
+
+	public void setSifra(String sifra) {
+		this.sifra = sifra;
 	}
 
 	public List<Aktivnost> getAktivnosts() {

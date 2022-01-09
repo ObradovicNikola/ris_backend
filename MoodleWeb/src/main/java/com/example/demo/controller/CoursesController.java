@@ -9,6 +9,7 @@ import javax.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -17,6 +18,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.demo.repository.CourseRepository;
+import com.example.demo.repository.PohadjaRepository;
+import com.example.demo.repository.StudentRepository;
 import com.example.demo.repository.UserRepository;
 import com.example.demo.repository.dto.CourseDTO;
 import com.example.demo.repository.dto.MaterialDTO;
@@ -28,6 +31,7 @@ import com.example.demo.security.models.AuthenticationRequest;
 import model.Course;
 import model.Materijal;
 import model.Pohadja;
+import model.Student;
 import model.User;
 
 @RestController
@@ -37,10 +41,19 @@ public class CoursesController {
 	CourseRepository courseRepo;
 
 	@Autowired
+	PohadjaRepository pohadjaRepo;
+
+	@Autowired
+	StudentRepository studentRepo;
+
+	@Autowired
 	private JWTUtil jwtUtil;
 
 	@Autowired
 	private UserRepository userRepo;
+
+	@Autowired
+	private PasswordEncoder bCryptPasswordEncoder;
 
 	@RequestMapping(value = "/courses", method = RequestMethod.GET)
 	public ResponseEntity<?> getAllCourses() {
@@ -78,6 +91,7 @@ public class CoursesController {
 			if (optionalUser.isPresent()) {
 				User u = optionalUser.get();
 				Course c = courseRepo.findById(Integer.parseInt(id)).get();
+				boolean upisan = false;
 
 				// provera da li ulogovani korisnik ima dozvolu da gleda kurs
 				if (u.getRole().getNaziv().equals("PROFESOR")) {
@@ -86,7 +100,6 @@ public class CoursesController {
 						return ResponseEntity.status(HttpStatus.FORBIDDEN).body(message);
 					}
 				} else if (u.getRole().getNaziv().equals("STUDENT")) {
-					boolean upisan = false;
 					int i = 0;
 					List<Pohadja> pohadjas = c.getPohadjas();
 					while (i < pohadjas.size() && upisan == false) {
@@ -95,11 +108,6 @@ public class CoursesController {
 						}
 						i++;
 					}
-					if (!upisan) {
-//						TODO: ako student nije upisan, vrati mu informacije o kursu da moze da se upise ako zna sifru
-						message.setMessage("Access denied.");
-						return ResponseEntity.status(HttpStatus.FORBIDDEN).body(message);
-					}
 				}
 
 				User uProf = c.getProfesor().getUser();
@@ -107,11 +115,10 @@ public class CoursesController {
 						uProf.getRole().getNaziv());
 
 				CourseDTO course = new CourseDTO(c.getIdCourse(), c.getNaziv(), c.getOpis(), c.getSadrzaj(), prof);
-				// TODO: staviti materijale kursa ako je ulogovani korisnik prijavljen na kurs
-				// bilo kao profesor bilo kao student
-				// TODO: dodati atribut boolean, da li je student prijavljen na kurs, ako
-				// student poziva metod
-				// TODO: testirati nakon sto profesor moze da doda materijale na kurs
+				course.setUpisan(upisan);
+
+				if (u.getRole().getNaziv().equals("STUDENT") && !upisan)
+					return ResponseEntity.ok(course);
 
 				List<MaterialDTO> materials = new ArrayList<>();
 				List<Materijal> materijali = c.getMaterijals();
@@ -187,7 +194,123 @@ public class CoursesController {
 		}
 	}
 
-	// TODO: upisivanje na kurs, moguce samo ako je ulogovani korisnik student
+	@RequestMapping(value = "/courses/signup", method = RequestMethod.POST)
+	public ResponseEntity<?> courseSignup(@RequestParam Integer idCourse, @RequestParam String sifra,
+			HttpServletRequest request) {
+		Optional<User> optionalUser = null;
+		Message message = new Message();
+		try {
+
+			final String authorizationHeader = request.getHeader("Authorization");
+
+			String email = null;
+			String jwt = null;
+
+			if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
+				jwt = authorizationHeader.substring(7);
+				email = jwtUtil.extractEmail(jwt);
+			}
+
+			optionalUser = userRepo.findByEmail(email);
+			if (optionalUser.isPresent()) {
+				User u = optionalUser.get();
+				Course c = courseRepo.findById(idCourse).get();
+
+				// provera da li je student vec upisan na kurs
+				if (u.getRole().getNaziv().equals("STUDENT")) {
+					boolean upisan = false;
+					int i = 0;
+					List<Pohadja> pohadjas = c.getPohadjas();
+					while (i < pohadjas.size() && upisan == false) {
+						if (pohadjas.get(i).getStudent().getIdUser() == u.getIdUser()) {
+							upisan = true;
+						}
+						i++;
+					}
+					if (upisan) {
+						message.setMessage("Already signed up.");
+						return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(message);
+					}
+				}
+
+				if (!bCryptPasswordEncoder.matches(sifra, c.getSifra())) {
+					message.setMessage("Bad password.");
+					return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(message);
+				}
+
+				Student s = studentRepo.findById(u.getIdUser()).get();
+				Pohadja pohadja = new Pohadja();
+				pohadja.setCourse(c);
+				pohadja.setStudent(s);
+				pohadjaRepo.save(pohadja);
+
+				message.setMessage("Successfully signed up.");
+				return ResponseEntity.ok(message);
+			} else {
+				message.setMessage("You are not logged in.");
+				return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(message);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		message.setMessage("Oops! Something went wrong.");
+		return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(message);
+	}
+
+	@RequestMapping(value = "/courses/signout", method = RequestMethod.POST)
+	public ResponseEntity<?> courseSignout(@RequestParam Integer idCourse, HttpServletRequest request) {
+		Optional<User> optionalUser = null;
+		Message message = new Message();
+		try {
+
+			final String authorizationHeader = request.getHeader("Authorization");
+
+			String email = null;
+			String jwt = null;
+
+			if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
+				jwt = authorizationHeader.substring(7);
+				email = jwtUtil.extractEmail(jwt);
+			}
+
+			optionalUser = userRepo.findByEmail(email);
+			if (optionalUser.isPresent()) {
+				User u = optionalUser.get();
+				Course c = courseRepo.findById(idCourse).get();
+
+				// provera da li je student vec upisan na kurs
+				if (u.getRole().getNaziv().equals("STUDENT")) {
+					boolean upisan = false;
+					int i = 0;
+					List<Pohadja> pohadjas = c.getPohadjas();
+					while (i < pohadjas.size() && upisan == false) {
+						if (pohadjas.get(i).getStudent().getIdUser() == u.getIdUser()) {
+							upisan = true;
+						}
+						i++;
+					}
+					if (!upisan) {
+						message.setMessage("You are not signed in to this course.");
+						return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(message);
+					}
+				}
+
+				pohadjaRepo.deleteByCourseAndStudent(idCourse, u.getIdUser());
+
+				message.setMessage("Successfully signed out.");
+				return ResponseEntity.ok(message);
+			} else {
+				message.setMessage("You are not logged in.");
+				return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(message);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		message.setMessage("Oops! Something went wrong.");
+		return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(message);
+	}
 
 	// TODO: dodavanje materijala na kurs, samo profesor moze
 }

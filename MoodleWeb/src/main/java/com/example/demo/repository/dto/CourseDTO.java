@@ -10,6 +10,7 @@ public class CourseDTO {
 	private String sadrzaj;
 	private UserDTO profesor;
 	private List<MaterialDTO> materials;
+	private boolean upisan = false;
 
 	public CourseDTO() {
 		super();
@@ -35,6 +36,18 @@ public class CourseDTO {
 		this.sadrzaj = sadrzaj;
 		this.profesor = profesor;
 		this.materials = materials;
+	}
+
+	public CourseDTO(int idCourse, String naziv, String opis, String sadrzaj, UserDTO profesor,
+			List<MaterialDTO> materials, boolean upisan) {
+		super();
+		this.idCourse = idCourse;
+		this.naziv = naziv;
+		this.opis = opis;
+		this.sadrzaj = sadrzaj;
+		this.profesor = profesor;
+		this.materials = materials;
+		this.upisan = upisan;
 	}
 
 	public int getIdCourse() {
@@ -83,6 +96,14 @@ public class CourseDTO {
 
 	public void setMaterials(List<MaterialDTO> materials) {
 		this.materials = materials;
+	}
+
+	public boolean isUpisan() {
+		return upisan;
+	}
+
+	public void setUpisan(boolean upisan) {
+		this.upisan = upisan;
 	}
 
 }
