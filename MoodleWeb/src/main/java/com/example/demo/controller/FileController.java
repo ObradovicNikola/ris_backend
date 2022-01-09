@@ -14,6 +14,8 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -208,6 +210,54 @@ public class FileController {
 		}
 
 		message.setMessage("Oops! Something went wrong.");
+		return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(message);
+	}
+
+	@PostMapping("/deleteFile/{idCourse}/{fileName:.+}")
+	public ResponseEntity<?> deleteFile(@PathVariable String fileName, @PathVariable Integer idCourse,
+			HttpServletRequest request) {
+		Optional<User> optionalUser = null;
+		Message message = new Message();
+		try {
+			// provera da li profesor ima dozvolu...
+			final String authorizationHeader = request.getHeader("Authorization");
+
+			String email = null;
+			String jwt = null;
+
+			if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
+				jwt = authorizationHeader.substring(7);
+				email = jwtUtil.extractEmail(jwt);
+			}
+
+			optionalUser = userRepo.findByEmail(email);
+			if (optionalUser.isPresent()) {
+				User u = optionalUser.get();
+
+				Course c = courseRepo.findById(idCourse).get();
+
+				// ako je profesor ulogovan, proveri da li on predaje na kursu
+				if (u.getRole().getNaziv().equals("PROFESOR")) {
+					if (c.getProfesor().getIdUser() != u.getIdUser()) {
+						message.setMessage("Access denied.");
+						return ResponseEntity.status(HttpStatus.FORBIDDEN).body(message);
+					}
+				}
+			}
+
+			// Load file as Resource
+			fileStorageService.deleteFile(fileName, idCourse);
+
+			materijalRepo.deleteByNaslovAndIdCourse(fileName, idCourse);
+
+			message.setMessage("Resource deleted succesfully.");
+			return ResponseEntity.ok().body(message);
+		} catch (Exception e) {
+			e.printStackTrace();
+			message.setMessage(e.getMessage());
+		}
+
+//		message.setMessage("Oops! Something went wrong.");
 		return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(message);
 	}
 }

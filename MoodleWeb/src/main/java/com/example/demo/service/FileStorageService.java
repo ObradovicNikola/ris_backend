@@ -130,4 +130,26 @@ public class FileStorageService {
 			throw new MyFileNotFoundException("File not found " + fileName, ex);
 		}
 	}
+
+	public boolean deleteFile(String fileName, Integer idCourse) throws IOException {
+		try {
+			final Path fileStorageLocationCustom = Paths
+					.get(fileStorageProperties.getUploadDir() + "/" + idCourse.toString()).toAbsolutePath().normalize();
+			Path filePath = fileStorageLocationCustom.resolve(fileName).normalize();
+			Resource resource = new UrlResource(filePath.toUri());
+			if (resource.exists()) {
+				try {
+					Files.delete(filePath);
+					return true;
+				} catch (IOException e) {
+					e.printStackTrace();
+					throw e;
+				}
+			} else {
+				throw new MyFileNotFoundException("File not found " + fileName);
+			}
+		} catch (MalformedURLException ex) {
+			throw new MyFileNotFoundException("File not found " + fileName, ex);
+		}
+	}
 }

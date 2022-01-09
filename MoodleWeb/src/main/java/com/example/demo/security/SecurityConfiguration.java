@@ -45,7 +45,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 				.csrf().disable().authorizeRequests()
 				.antMatchers("/login", "/register", "/").permitAll()
 				.antMatchers("/admin").hasAnyAuthority("ADMIN")
-				.antMatchers("/uploadFile").hasAnyAuthority("PROFESOR", "ADMIN")
+				.antMatchers("/uploadFile", "/deleteFile/**").hasAnyAuthority("PROFESOR", "ADMIN")
 				.antMatchers("/courses/*").hasAnyAuthority("STUDENT", "PROFESOR", "ADMIN")
 				.antMatchers("/courses").hasAnyAuthority("STUDENT", "ADMIN")
 				.antMatchers("/mycourses").hasAnyAuthority("STUDENT", "PROFESOR")
