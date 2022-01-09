@@ -188,8 +188,8 @@ ENGINE = InnoDB;
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `ris_projekat`.`Materijal` (
   `idMaterijal` INT NOT NULL AUTO_INCREMENT,
-  `putanja` VARCHAR(255) NOT NULL,
-  `naslov` VARCHAR(45) NOT NULL,
+  `putanja` VARCHAR(855) NOT NULL,
+  `naslov` VARCHAR(545) NOT NULL,
   `idCourse` INT NOT NULL,
   `contentType` VARCHAR(45) NULL,
   PRIMARY KEY (`idMaterijal`),
