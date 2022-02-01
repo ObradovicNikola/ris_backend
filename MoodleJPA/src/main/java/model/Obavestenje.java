@@ -2,7 +2,6 @@ package model;
 
 import java.io.Serializable;
 import javax.persistence.*;
-import java.util.Date;
 import java.util.List;
 
 
@@ -19,8 +18,7 @@ public class Obavestenje implements Serializable {
 	@GeneratedValue(strategy=GenerationType.IDENTITY)
 	private int idObavestenje;
 
-	@Temporal(TemporalType.DATE)
-	private Date datum;
+	private int datum;
 
 	private String sadrzaj;
 
@@ -44,11 +42,11 @@ public class Obavestenje implements Serializable {
 		this.idObavestenje = idObavestenje;
 	}
 
-	public Date getDatum() {
+	public int getDatum() {
 		return this.datum;
 	}
 
-	public void setDatum(Date datum) {
+	public void setDatum(int datum) {
 		this.datum = datum;
 	}
 

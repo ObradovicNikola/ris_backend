@@ -101,11 +101,11 @@ ENGINE = InnoDB;
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `ris_projekat`.`Aktivnost` (
   `idAktivnost` INT NOT NULL AUTO_INCREMENT,
-  `naziv` VARCHAR(45) NULL,
+  `naziv` VARCHAR(45) NOT NULL,
   `opis` VARCHAR(255) NULL,
-  `datum` DATE NULL,
+  `datum` INT(11) NOT NULL,
+  `maxOcena` INT NOT NULL,
   `idCourse` INT NOT NULL,
-  `maxBrPoena` INT NULL,
   INDEX `fk_Aktivnost_Kurs1_idx` (`idCourse` ASC) VISIBLE,
   PRIMARY KEY (`idAktivnost`),
   CONSTRAINT `fk_Aktivnost_Kurs1`
@@ -122,8 +122,8 @@ ENGINE = InnoDB;
 CREATE TABLE IF NOT EXISTS `ris_projekat`.`Obavestenje` (
   `idObavestenje` INT NOT NULL AUTO_INCREMENT,
   `idCourse` INT NOT NULL,
-  `datum` DATE NULL,
-  `sadrzaj` VARCHAR(500) NULL,
+  `datum` INT(11) NOT NULL,
+  `sadrzaj` VARCHAR(500) NOT NULL,
   PRIMARY KEY (`idObavestenje`),
   INDEX `fk_Obavestenje_Kurs1_idx` (`idCourse` ASC) VISIBLE,
   CONSTRAINT `fk_Obavestenje_Kurs1`
@@ -163,9 +163,8 @@ ENGINE = InnoDB;
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `ris_projekat`.`Ocene` (
   `idOcene` INT NOT NULL AUTO_INCREMENT,
+  `ocena` INT NULL,
   `idStudent` INT NOT NULL,
-  `Aktivnost_Profesor_idProfesor` INT NOT NULL,
-  `brPoena` INT NULL,
   `Aktivnost_idAktivnost` INT NOT NULL,
   PRIMARY KEY (`idOcene`),
   INDEX `fk_Ocene_Student1_idx` (`idStudent` ASC) VISIBLE,
@@ -223,22 +222,6 @@ CREATE TABLE IF NOT EXISTS `ris_projekat`.`Pohadja` (
     ON UPDATE NO ACTION)
 ENGINE = InnoDB;
 
-
-SET SQL_MODE=@OLD_SQL_MODE;
-SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS;
-SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS;
-
--- -----------------------------------------------------
--- Data for table `ris_projekat`.`Role`
--- -----------------------------------------------------
-START TRANSACTION;
-USE `ris_projekat`;
-INSERT INTO `ris_projekat`.`Role` (`idRole`, `naziv`) VALUES (1, 'ADMIN');
-INSERT INTO `ris_projekat`.`Role` (`idRole`, `naziv`) VALUES (2, 'PROFESOR');
-INSERT INTO `ris_projekat`.`Role` (`idRole`, `naziv`) VALUES (3, 'STUDENT');
-
-COMMIT;
-
 USE `ris_projekat`;
 
 DELIMITER $$
@@ -264,3 +247,19 @@ END$$
 
 
 DELIMITER ;
+
+SET SQL_MODE=@OLD_SQL_MODE;
+SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS;
+SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS;
+
+-- -----------------------------------------------------
+-- Data for table `ris_projekat`.`Role`
+-- -----------------------------------------------------
+START TRANSACTION;
+USE `ris_projekat`;
+INSERT INTO `ris_projekat`.`Role` (`idRole`, `naziv`) VALUES (1, 'ADMIN');
+INSERT INTO `ris_projekat`.`Role` (`idRole`, `naziv`) VALUES (2, 'PROFESOR');
+INSERT INTO `ris_projekat`.`Role` (`idRole`, `naziv`) VALUES (3, 'STUDENT');
+
+COMMIT;
+

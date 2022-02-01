@@ -216,6 +216,7 @@ public class FileController {
 	@PostMapping("/deleteFile/{idCourse}/{fileName:.+}")
 	public ResponseEntity<?> deleteFile(@PathVariable String fileName, @PathVariable Integer idCourse,
 			HttpServletRequest request) {
+		
 		Optional<User> optionalUser = null;
 		Message message = new Message();
 		try {

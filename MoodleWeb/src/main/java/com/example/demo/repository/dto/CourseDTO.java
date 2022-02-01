@@ -10,6 +10,8 @@ public class CourseDTO {
 	private String sadrzaj;
 	private UserDTO profesor;
 	private List<MaterialDTO> materials;
+	private List<ObavestenjeDTO> notifications;
+	private List<AktivnostDTO> activities;
 	private boolean upisan = false;
 
 	public CourseDTO() {
@@ -47,6 +49,34 @@ public class CourseDTO {
 		this.sadrzaj = sadrzaj;
 		this.profesor = profesor;
 		this.materials = materials;
+		this.upisan = upisan;
+	}
+
+	public CourseDTO(int idCourse, String naziv, String opis, String sadrzaj, UserDTO profesor,
+			List<MaterialDTO> materials, List<ObavestenjeDTO> notifications, boolean upisan) {
+		super();
+		this.idCourse = idCourse;
+		this.naziv = naziv;
+		this.opis = opis;
+		this.sadrzaj = sadrzaj;
+		this.profesor = profesor;
+		this.materials = materials;
+		this.notifications = notifications;
+		this.upisan = upisan;
+	}
+
+	public CourseDTO(int idCourse, String naziv, String opis, String sadrzaj, UserDTO profesor,
+			List<MaterialDTO> materials, List<ObavestenjeDTO> notifications, List<AktivnostDTO> activities,
+			boolean upisan) {
+		super();
+		this.idCourse = idCourse;
+		this.naziv = naziv;
+		this.opis = opis;
+		this.sadrzaj = sadrzaj;
+		this.profesor = profesor;
+		this.materials = materials;
+		this.notifications = notifications;
+		this.activities = activities;
 		this.upisan = upisan;
 	}
 
@@ -104,6 +134,22 @@ public class CourseDTO {
 
 	public void setUpisan(boolean upisan) {
 		this.upisan = upisan;
+	}
+
+	public List<ObavestenjeDTO> getNotifications() {
+		return notifications;
+	}
+
+	public void setNotifications(List<ObavestenjeDTO> notifications) {
+		this.notifications = notifications;
+	}
+
+	public List<AktivnostDTO> getActivities() {
+		return activities;
+	}
+
+	public void setActivities(List<AktivnostDTO> activities) {
+		this.activities = activities;
 	}
 
 }

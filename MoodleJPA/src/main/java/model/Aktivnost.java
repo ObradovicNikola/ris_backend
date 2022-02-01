@@ -2,7 +2,6 @@ package model;
 
 import java.io.Serializable;
 import javax.persistence.*;
-import java.util.Date;
 import java.util.List;
 
 
@@ -19,10 +18,9 @@ public class Aktivnost implements Serializable {
 	@GeneratedValue(strategy=GenerationType.IDENTITY)
 	private int idAktivnost;
 
-	@Temporal(TemporalType.DATE)
-	private Date datum;
+	private int datum;
 
-	private int maxBrPoena;
+	private int maxOcena;
 
 	private String naziv;
 
@@ -48,20 +46,20 @@ public class Aktivnost implements Serializable {
 		this.idAktivnost = idAktivnost;
 	}
 
-	public Date getDatum() {
+	public int getDatum() {
 		return this.datum;
 	}
 
-	public void setDatum(Date datum) {
+	public void setDatum(int datum) {
 		this.datum = datum;
 	}
 
-	public int getMaxBrPoena() {
-		return this.maxBrPoena;
+	public int getMaxOcena() {
+		return this.maxOcena;
 	}
 
-	public void setMaxBrPoena(int maxBrPoena) {
-		this.maxBrPoena = maxBrPoena;
+	public void setMaxOcena(int maxOcena) {
+		this.maxOcena = maxOcena;
 	}
 
 	public String getNaziv() {

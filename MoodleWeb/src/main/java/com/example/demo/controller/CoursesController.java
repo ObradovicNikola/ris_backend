@@ -21,15 +21,19 @@ import com.example.demo.repository.CourseRepository;
 import com.example.demo.repository.PohadjaRepository;
 import com.example.demo.repository.StudentRepository;
 import com.example.demo.repository.UserRepository;
+import com.example.demo.repository.dto.AktivnostDTO;
 import com.example.demo.repository.dto.CourseDTO;
 import com.example.demo.repository.dto.MaterialDTO;
 import com.example.demo.repository.dto.Message;
+import com.example.demo.repository.dto.ObavestenjeDTO;
 import com.example.demo.repository.dto.UserDTO;
 import com.example.demo.security.JWTUtil;
 import com.example.demo.security.models.AuthenticationRequest;
 
+import model.Aktivnost;
 import model.Course;
 import model.Materijal;
+import model.Obavestenje;
 import model.Pohadja;
 import model.Student;
 import model.User;
@@ -128,6 +132,24 @@ public class CoursesController {
 					materials.add(mat);
 				}
 				course.setMaterials(materials);
+
+				List<ObavestenjeDTO> notifications = new ArrayList<>();
+				List<Obavestenje> obavestenja = c.getObavestenjes();
+				for (Obavestenje o : obavestenja) {
+					ObavestenjeDTO ob = new ObavestenjeDTO(o.getIdObavestenje(), o.getDatum(), o.getSadrzaj(),
+							c.getIdCourse());
+					notifications.add(ob);
+				}
+				course.setNotifications(notifications);
+
+				List<AktivnostDTO> activities = new ArrayList<>();
+				List<Aktivnost> aktivnosti = c.getAktivnosts();
+				for (Aktivnost a : aktivnosti) {
+					AktivnostDTO akt = new AktivnostDTO(a.getNaziv(), a.getOpis(), a.getIdAktivnost(), a.getMaxOcena(),
+							a.getDatum());
+					activities.add(akt);
+				}
+				course.setActivities(activities);
 
 				return ResponseEntity.ok(course);
 			} else {

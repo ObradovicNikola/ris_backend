@@ -17,10 +17,7 @@ public class Ocene implements Serializable {
 	@GeneratedValue(strategy=GenerationType.IDENTITY)
 	private int idOcene;
 
-	@Column(name="Aktivnost_Profesor_idProfesor")
-	private int aktivnost_Profesor_idProfesor;
-
-	private int brPoena;
+	private int ocena;
 
 	//bi-directional many-to-one association to Aktivnost
 	@ManyToOne
@@ -43,20 +40,12 @@ public class Ocene implements Serializable {
 		this.idOcene = idOcene;
 	}
 
-	public int getAktivnost_Profesor_idProfesor() {
-		return this.aktivnost_Profesor_idProfesor;
+	public int getOcena() {
+		return this.ocena;
 	}
 
-	public void setAktivnost_Profesor_idProfesor(int aktivnost_Profesor_idProfesor) {
-		this.aktivnost_Profesor_idProfesor = aktivnost_Profesor_idProfesor;
-	}
-
-	public int getBrPoena() {
-		return this.brPoena;
-	}
-
-	public void setBrPoena(int brPoena) {
-		this.brPoena = brPoena;
+	public void setOcena(int ocena) {
+		this.ocena = ocena;
 	}
 
 	public Aktivnost getAktivnost() {
