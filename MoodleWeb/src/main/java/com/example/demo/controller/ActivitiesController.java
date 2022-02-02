@@ -140,7 +140,7 @@ public class ActivitiesController {
 		return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(message);
 	}
 
-	@DeleteMapping("/course/activity/{idAktivnost}")
+	@PostMapping("/course/activity/cancel/{idAktivnost}")
 	public ResponseEntity<?> deleteActivity(@PathVariable Integer idAktivnost, HttpServletRequest request) {
 		Optional<User> optionalUser = null;
 		Message message = new Message();
@@ -172,7 +172,23 @@ public class ActivitiesController {
 				}
 			}
 
+			Aktivnost akt = aktivnostRepo.findById(idAktivnost).get();
+			String naziv = akt.getNaziv();
 			aktivnostRepo.deleteById(idAktivnost);
+
+			// get list of all students, send them emails
+			List<User> studenti = c.getPohadjas().stream().map((x) -> {
+				return x.getStudent().getUser();
+			}).collect(Collectors.toList());
+
+			String emailPoruka = "Aktivnost " + naziv + " iz predmeta " + c.getNaziv() + " je otkazana.";
+			for (User s : studenti) {
+				try {
+					emailService.sendSimpleMessage(s.getEmail(), c.getNaziv() + " - " + naziv, emailPoruka);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
 
 			message.setMessage("Activity deleted successfully");
 

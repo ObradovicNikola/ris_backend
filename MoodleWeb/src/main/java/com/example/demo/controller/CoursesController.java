@@ -11,12 +11,12 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.example.demo.controller.email.EmailServiceImpl;
 import com.example.demo.repository.CourseRepository;
 import com.example.demo.repository.PohadjaRepository;
 import com.example.demo.repository.StudentRepository;
@@ -28,7 +28,6 @@ import com.example.demo.repository.dto.Message;
 import com.example.demo.repository.dto.ObavestenjeDTO;
 import com.example.demo.repository.dto.UserDTO;
 import com.example.demo.security.JWTUtil;
-import com.example.demo.security.models.AuthenticationRequest;
 
 import model.Aktivnost;
 import model.Course;
@@ -58,6 +57,9 @@ public class CoursesController {
 
 	@Autowired
 	private PasswordEncoder bCryptPasswordEncoder;
+
+	@Autowired
+	EmailServiceImpl emailService;
 
 	@RequestMapping(value = "/courses", method = RequestMethod.GET)
 	public ResponseEntity<?> getAllCourses() {
@@ -266,6 +268,13 @@ public class CoursesController {
 				pohadja.setStudent(s);
 				pohadjaRepo.save(pohadja);
 
+				String emailPoruka = "Upisani ste na kurs " + c.getNaziv();
+				try {
+					emailService.sendSimpleMessage(u.getEmail(), c.getNaziv() + " - upis", emailPoruka);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+
 				message.setMessage("Successfully signed up.");
 				return ResponseEntity.ok(message);
 			} else {
@@ -319,6 +328,13 @@ public class CoursesController {
 				}
 
 				pohadjaRepo.deleteByCourseAndStudent(idCourse, u.getIdUser());
+				
+				String emailPoruka = "Ispisani ste sa kursa " + c.getNaziv();
+				try {
+					emailService.sendSimpleMessage(u.getEmail(), c.getNaziv() + " - ispis", emailPoruka);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
 
 				message.setMessage("Successfully signed out.");
 				return ResponseEntity.ok(message);
