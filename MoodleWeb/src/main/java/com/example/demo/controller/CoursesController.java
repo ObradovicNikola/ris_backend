@@ -350,5 +350,5 @@ public class CoursesController {
 		return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(message);
 	}
 
-	// TODO: dodavanje materijala na kurs, samo profesor moze
+	
 }
