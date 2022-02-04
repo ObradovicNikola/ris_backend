@@ -21,7 +21,7 @@ public class Ocene implements Serializable {
 
 	//bi-directional many-to-one association to Aktivnost
 	@ManyToOne
-	@JoinColumn(name="Aktivnost_idAktivnost")
+	@JoinColumn(name="idAktivnost")
 	private Aktivnost aktivnost;
 
 	//bi-directional many-to-one association to Student

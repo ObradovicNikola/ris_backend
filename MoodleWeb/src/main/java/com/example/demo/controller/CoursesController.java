@@ -166,8 +166,6 @@ public class CoursesController {
 		return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(message);
 	}
 
-	// TODO: svi kursevi ulogovanog korisnika, bio on student ili profesor
-	// myCourses()
 	@RequestMapping(value = "/mycourses", method = RequestMethod.GET)
 	public ResponseEntity<?> getMyCourses(HttpServletRequest request) {
 		Optional<User> optionalUser = null;

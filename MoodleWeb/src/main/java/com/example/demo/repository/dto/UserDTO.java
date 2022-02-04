@@ -1,10 +1,5 @@
 package com.example.demo.repository.dto;
 
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-
-import model.Role;
-
 public class UserDTO {
 	private int idUser;
 

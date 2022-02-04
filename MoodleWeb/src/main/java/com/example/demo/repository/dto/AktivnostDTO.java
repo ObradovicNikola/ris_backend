@@ -3,9 +3,15 @@ package com.example.demo.repository.dto;
 public class AktivnostDTO {
 	private String naziv;
 	private String opis;
+	private String nazivKursa;
 	private int idAktivnost;
 	private int maxOcena;
 	private int datum; // in unix seconds
+	private int ocena; // ako student dobavlja aktivnost, ona ima ocenu
+
+	public AktivnostDTO() {
+		super();
+	}
 
 	public AktivnostDTO(String naziv, int idAktivnost, int maxOcena, int datum) {
 		super();
@@ -23,6 +29,18 @@ public class AktivnostDTO {
 		this.idAktivnost = idAktivnost;
 		this.maxOcena = maxOcena;
 		this.datum = datum;
+	}
+
+	public AktivnostDTO(String naziv, String opis, String nazivKursa, int idAktivnost, int maxOcena, int datum,
+			int ocena) {
+		super();
+		this.naziv = naziv;
+		this.opis = opis;
+		this.nazivKursa = nazivKursa;
+		this.idAktivnost = idAktivnost;
+		this.maxOcena = maxOcena;
+		this.datum = datum;
+		this.ocena = ocena;
 	}
 
 	public String getNaziv() {
@@ -63,6 +81,22 @@ public class AktivnostDTO {
 
 	public void setDatum(int datum) {
 		this.datum = datum;
+	}
+
+	public int getOcena() {
+		return ocena;
+	}
+
+	public void setOcena(int ocena) {
+		this.ocena = ocena;
+	}
+
+	public String getNazivKursa() {
+		return nazivKursa;
+	}
+
+	public void setNazivKursa(String nazivKursa) {
+		this.nazivKursa = nazivKursa;
 	}
 
 }
