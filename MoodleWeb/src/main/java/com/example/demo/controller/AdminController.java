@@ -48,7 +48,6 @@ import net.sf.jasperreports.engine.JasperFillManager;
 import net.sf.jasperreports.engine.JasperPrint;
 import net.sf.jasperreports.engine.JasperReport;
 import net.sf.jasperreports.engine.data.JRBeanCollectionDataSource;
-import net.sf.jasperreports.engine.design.JRDesignStyle;
 
 @RestController
 public class AdminController {
@@ -386,13 +385,6 @@ public class AdminController {
 			parameters.put("profesorPrezime", prof.getPrezime());
 
 			JasperPrint jasperPrint = JasperFillManager.fillReport(jasperReport, parameters, data);
-
-			JRDesignStyle jrDesignStyle = new JRDesignStyle();
-			/* Set the Encoding to UTF-8 for pdf and embed font to arial */
-			jrDesignStyle.setDefault(true);
-			jrDesignStyle.setPdfEncoding("UTF-8");
-			jrDesignStyle.setPdfEmbedded(true);
-			jasperPrint.addStyle(jrDesignStyle);
 
 			// forces download
 			String headerKey = "Content-Disposition";
