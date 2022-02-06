@@ -9,6 +9,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -62,6 +63,10 @@ public class AuthenticationController {
 		} catch (BadCredentialsException e) {
 			e.printStackTrace();
 			Message message = new Message("Wrong email or password");
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(message);
+		} catch (DisabledException e) {
+			e.printStackTrace();
+			Message message = new Message("This account is disabled.");
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(message);
 		}
 

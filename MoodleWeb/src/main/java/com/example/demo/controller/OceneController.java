@@ -203,7 +203,6 @@ public class OceneController {
 		Message message = new Message();
 		try {
 
-			// provera da li profesor ima dozvolu...
 			final String authorizationHeader = request.getHeader("Authorization");
 
 			String email = null;
@@ -227,8 +226,6 @@ public class OceneController {
 				sveAktivnosti = u.getStudent().getPohadjas().stream().flatMap((x) -> {
 					return x.getCourse().getAktivnosts().stream();
 				}).collect(Collectors.toList());
-				// TODO TODO....
-//				
 			} else {
 				sveAktivnosti = u.getProfesor().getCourses().stream().flatMap((x) -> {
 					return x.getAktivnosts().stream();
@@ -258,9 +255,7 @@ public class OceneController {
 			}
 
 			return ResponseEntity.ok(aktivnostiResponse);
-		} catch (
-
-		Exception e) {
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 
