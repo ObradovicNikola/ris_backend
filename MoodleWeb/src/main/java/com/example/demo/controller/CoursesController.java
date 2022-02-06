@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.example.demo.controller.email.EmailServiceImpl;
 import com.example.demo.repository.CourseRepository;
+import com.example.demo.repository.OceneRepository;
 import com.example.demo.repository.PohadjaRepository;
 import com.example.demo.repository.StudentRepository;
 import com.example.demo.repository.UserRepository;
@@ -33,6 +34,7 @@ import model.Aktivnost;
 import model.Course;
 import model.Materijal;
 import model.Obavestenje;
+import model.Ocene;
 import model.Pohadja;
 import model.Student;
 import model.User;
@@ -54,6 +56,9 @@ public class CoursesController {
 
 	@Autowired
 	private UserRepository userRepo;
+
+	@Autowired
+	private OceneRepository oceneRepo;
 
 	@Autowired
 	private PasswordEncoder bCryptPasswordEncoder;
@@ -149,6 +154,12 @@ public class CoursesController {
 				for (Aktivnost a : aktivnosti) {
 					AktivnostDTO akt = new AktivnostDTO(a.getNaziv(), a.getOpis(), a.getIdAktivnost(), a.getMaxOcena(),
 							a.getDatum());
+					if (u.getRole().getNaziv().equals("STUDENT")) {
+						Optional<Ocene> ocena = oceneRepo.findByStudentAndAktivnost(u.getIdUser(), a.getIdAktivnost());
+						if (ocena.isPresent()) {
+							akt.setOcena(ocena.get().getOcena());
+						}
+					}
 					activities.add(akt);
 				}
 				course.setActivities(activities);
@@ -326,7 +337,7 @@ public class CoursesController {
 				}
 
 				pohadjaRepo.deleteByCourseAndStudent(idCourse, u.getIdUser());
-				
+
 				String emailPoruka = "Ispisani ste sa kursa " + c.getNaziv();
 				try {
 					emailService.sendSimpleMessage(u.getEmail(), c.getNaziv() + " - ispis", emailPoruka);
@@ -348,5 +359,4 @@ public class CoursesController {
 		return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(message);
 	}
 
-	
 }
