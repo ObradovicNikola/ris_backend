@@ -1,11 +1,19 @@
 package com.example.demo.controller;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -33,6 +41,14 @@ import model.Course;
 import model.Ocene;
 import model.Profesor;
 import model.User;
+import net.sf.jasperreports.engine.JRException;
+import net.sf.jasperreports.engine.JasperCompileManager;
+import net.sf.jasperreports.engine.JasperExportManager;
+import net.sf.jasperreports.engine.JasperFillManager;
+import net.sf.jasperreports.engine.JasperPrint;
+import net.sf.jasperreports.engine.JasperReport;
+import net.sf.jasperreports.engine.data.JRBeanCollectionDataSource;
+import net.sf.jasperreports.engine.design.JRDesignStyle;
 
 @RestController
 public class AdminController {
@@ -309,5 +325,86 @@ public class AdminController {
 
 		message.setMessage("Oops! Something went wrong.");
 		return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(message);
+	}
+
+	// izvestaj o svim profesorima
+	@GetMapping("/admin/izvestaj/profesori")
+	public void getIzvestajProfesori(HttpServletResponse response) throws JRException, IOException {
+		String pattern = "dd-MMM-yyyy";
+		SimpleDateFormat simpleDateFormat = new SimpleDateFormat(pattern);
+
+		String date = simpleDateFormat.format(new Date());
+
+		List<User> profesors = profesorRepo.findAll().stream().map((x) -> {
+			return x.getUser();
+		}).collect(Collectors.toList());
+		JRBeanCollectionDataSource data = new JRBeanCollectionDataSource(profesors);
+
+		InputStream employeeReportStream = getClass().getResourceAsStream("/jasperreports/profesoriReport.jrxml");
+		JasperReport jasperReport = JasperCompileManager.compileReport(employeeReportStream);
+
+		Map<String, Object> parameters = new HashMap<>();
+		parameters.put("date", date);
+
+		JasperPrint jasperPrint = JasperFillManager.fillReport(jasperReport, parameters, data);
+
+		// forces download
+		String headerKey = "Content-Disposition";
+		String headerValue = String.format("attachment; filename=profesori.pdf");
+		response.setHeader(headerKey, headerValue);
+
+		ServletOutputStream out = response.getOutputStream();
+
+		JasperExportManager.exportReportToPdfStream(jasperPrint, out);
+	}
+
+	// izvestaj o jednom kursu sa svim polaznicima
+	@GetMapping("/admin/izvestaj/kurs/{idCourse}")
+	public void getIzvestajKurs(@PathVariable Integer idCourse, HttpServletResponse response) {
+		try {
+			String pattern = "dd-MMM-yyyy";
+			SimpleDateFormat simpleDateFormat = new SimpleDateFormat(pattern);
+
+			String date = simpleDateFormat.format(new Date());
+
+			Course course = courseRepo.findById(idCourse).get();
+			User prof = course.getProfesor().getUser();
+
+			List<User> students = course.getPohadjas().stream().map((x) -> {
+				return x.getStudent().getUser();
+			}).collect(Collectors.toList());
+			JRBeanCollectionDataSource data = new JRBeanCollectionDataSource(students);
+
+			InputStream employeeReportStream = getClass().getResourceAsStream("/jasperreports/kursReport.jrxml");
+			JasperReport jasperReport = JasperCompileManager.compileReport(employeeReportStream);
+
+			Map<String, Object> parameters = new HashMap<>();
+			parameters.put("date", date);
+			parameters.put("naziv", course.getNaziv());
+			parameters.put("opis", course.getOpis());
+			parameters.put("profesorIme", prof.getIme());
+			parameters.put("profesorPrezime", prof.getPrezime());
+
+			JasperPrint jasperPrint = JasperFillManager.fillReport(jasperReport, parameters, data);
+
+			JRDesignStyle jrDesignStyle = new JRDesignStyle();
+			/* Set the Encoding to UTF-8 for pdf and embed font to arial */
+			jrDesignStyle.setDefault(true);
+			jrDesignStyle.setPdfEncoding("UTF-8");
+			jrDesignStyle.setPdfEmbedded(true);
+			jasperPrint.addStyle(jrDesignStyle);
+
+			// forces download
+			String headerKey = "Content-Disposition";
+			String headerValue = String.format("attachment; filename=profesori.pdf");
+			response.setHeader(headerKey, headerValue);
+
+			ServletOutputStream out = response.getOutputStream();
+
+			JasperExportManager.exportReportToPdfStream(jasperPrint, out);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
 	}
 }
